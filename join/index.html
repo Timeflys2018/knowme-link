@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="referrer" content="no-referrer" />
+<title>加入共享知识空间 · KnowMe</title>
+<style>
+  :root { color-scheme: light dark; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; min-height: 100vh; display: grid; place-items: center;
+    font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+    background: #faf8f3; color: #1f1d18; padding: 24px;
+  }
+  @media (prefers-color-scheme: dark) { body { background: #1a1916; color: #e8e3d8; } }
+  .card {
+    width: min(440px, 100%); text-align: center;
+    background: color-mix(in srgb, currentColor 4%, transparent);
+    border: 1px solid color-mix(in srgb, currentColor 12%, transparent);
+    border-radius: 14px; padding: 32px 28px;
+  }
+  h1 { font-size: 20px; margin: 0 0 6px; }
+  p { font-size: 14px; line-height: 1.7; color: color-mix(in srgb, currentColor 62%, transparent); margin: 0 0 18px; }
+  .btn {
+    display: inline-block; text-decoration: none; font-size: 14px; font-weight: 600;
+    padding: 10px 20px; border-radius: 8px; background: #a35e07; color: #fff; border: 0; cursor: pointer;
+  }
+  .btn.secondary { background: transparent; color: inherit; border: 1px solid color-mix(in srgb, currentColor 20%, transparent); font-weight: 500; margin-top: 10px; }
+  .hint { font-size: 12px; color: color-mix(in srgb, currentColor 45%, transparent); margin-top: 20px; }
+  code { font-family: "SF Mono", ui-monospace, Menlo, monospace; font-size: 12px; word-break: break-all; }
+  .err { color: #dc2626; }
+</style>
+</head>
+<body>
+  <div class="card">
+    <h1>加入共享知识空间</h1>
+    <p id="msg">正在唤起 KnowMe…</p>
+    <a class="btn" id="open" href="#" hidden>在 KnowMe 中打开</a>
+    <a class="btn secondary" id="dl" href="https://github.com/Timeflys2018/knowme/releases" hidden>还没安装？下载 KnowMe</a>
+    <p class="hint" id="hint" hidden>若未自动打开，请确认已安装 KnowMe，然后点上面的按钮。你需先在 git 平台被加为该仓库成员（链接不授予权限）；内容以明文存于 git 远端，非端到端加密。</p>
+  </div>
+<script>
+  // Static invite-redirect page (方案 C, zero-server): the token in location.hash is the SAME
+  // base64url(encodeJoinRemote) the desktop uses; we only re-wrap it as knowme://join/<token> and
+  // navigate there so WeChat/Lark can send a clickable https link that still lands in KnowMe. No
+  // decode/exec of the token here — it is passed verbatim to the OS, which hands it to the app.
+  var TOKEN_RE = /^[A-Za-z0-9_-]{1,512}$/;
+  var token = (location.hash || '').replace(/^#/, '').trim();
+  var msg = document.getElementById('msg');
+  var open = document.getElementById('open');
+  var dl = document.getElementById('dl');
+  var hint = document.getElementById('hint');
+  if (!TOKEN_RE.test(token)) {
+    msg.textContent = '链接无效或已损坏。';
+    msg.className = 'err';
+    dl.hidden = false;
+  } else {
+    var deep = 'knowme://join/' + token;
+    open.href = deep;
+    open.hidden = false;
+    dl.hidden = false;
+    hint.hidden = false;
+    // Auto-attempt once; the visible button is the reliable fallback (some browsers block auto
+    // custom-scheme navigation without a user gesture).
+    try { window.location.href = deep; } catch (e) { /* fall back to the button */ }
+    msg.textContent = '若未自动打开，请点下方按钮。';
+  }
+</script>
+</body>
+</html>
